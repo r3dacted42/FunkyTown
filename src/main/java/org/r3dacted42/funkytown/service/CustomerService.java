@@ -2,10 +2,14 @@ package org.r3dacted42.funkytown.service;
 
 import lombok.RequiredArgsConstructor;
 import org.r3dacted42.funkytown.dto.CustomerRequest;
+import org.r3dacted42.funkytown.dto.CustomerResponse;
 import org.r3dacted42.funkytown.entity.Customer;
+import org.r3dacted42.funkytown.exception.CustomerNotFoundException;
 import org.r3dacted42.funkytown.mapper.CustomerMapper;
 import org.r3dacted42.funkytown.repo.CustomerRepo;
 import org.springframework.stereotype.Service;
+
+import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +21,18 @@ public class CustomerService {
         Customer customer = customerMapper.toEntity(request);
         customerRepo.save(customer);
         return "Customer created";
+    }
+
+    private Customer getCustomer(String email) {
+        return customerRepo.findByEmail(email)
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        format("Cannot get Customer:: No customer found with the provided email:: %s", email)
+                ));
+    }
+
+    public CustomerResponse retrieveCustomer(String email) {
+        Customer customer = getCustomer(email);
+        return customerMapper.toResponse(customer);
     }
 
 }
